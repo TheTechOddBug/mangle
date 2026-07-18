@@ -279,6 +279,10 @@ var (
 	// TimeTruncCivil truncates a time to the start of a calendar unit in a
 	// given timezone: fn:time:trunc_civil(Time, TimeZone, UnitName) -> Time
 	TimeTruncCivil = ast.FunctionSym{"fn:time:trunc_civil", 3}
+	// TimeWeekdayCivil returns the ISO day of the week (Monday=1 … Sunday=7) for a
+	// time instant, evaluated in a given timezone:
+	// fn:time:weekday_civil(Time, TimeZone) -> Number
+	TimeWeekdayCivil = ast.FunctionSym{"fn:time:weekday_civil", 2}
 
 	// Duration functions
 

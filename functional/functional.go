@@ -766,6 +766,28 @@ func EvalApplyFn(applyFn ast.ApplyFn, subst ast.Subst) (ast.Constant, error) {
 			return ast.Constant{}, fmt.Errorf("fn:time:add_civil unknown unit %q", unitName)
 		}
 
+	case symbols.TimeWeekdayCivil.Symbol:
+		if l := len(evaluatedArgs); l != 2 {
+			return ast.Constant{}, fmt.Errorf("fn:time:weekday_civil expected 2 arguments, got %d", l)
+		}
+		t, err := evaluatedArgs[0].TimeValue()
+		if err != nil {
+			return ast.Constant{}, fmt.Errorf("fn:time:weekday_civil first argument must be time: %w", err)
+		}
+		tz, err := evaluatedArgs[1].StringValue()
+		if err != nil {
+			return ast.Constant{}, fmt.Errorf("fn:time:weekday_civil second argument must be string: %w", err)
+		}
+		loc, err := time.LoadLocation(tz)
+		if err != nil {
+			return ast.Constant{}, fmt.Errorf("fn:time:weekday_civil unknown timezone %q: %w", tz, err)
+		}
+
+		// Remap weekday to ISO convention (Monday=1 ... Sunday=7).
+		wd := time.Unix(0, t).In(loc).Weekday()
+		iso := (int64(wd)+6)%7 + 1
+		return ast.Number(iso), nil
+
 	// Duration functions
 	case symbols.DurationAdd.Symbol:
 		if l := len(evaluatedArgs); l != 2 {

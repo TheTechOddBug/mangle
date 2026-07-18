@@ -194,6 +194,9 @@ format (RFC 3339).
     advance the instant by 23 or 25 absolute hours. The resulting time is
     normalized (e.g. January 31st plus one month is March 2nd or March 3rd,
     depending on leap years).
+*   `fn:time:weekday_civil(Time, TimeZone)`: Returns the ISO day of the week as
+    a number, evaluated against the wall clock in the specified timezone (e.g.
+    "America/Los_Angeles"): Monday is `1` through Sunday is `7`.
 *   `fn:time:add(Time, Duration)`: Adds a duration to a time.
 *   `fn:time:sub(Time1, Time2)`: Subtracts two times to get a duration.
 *   `fn:time:year(Time)`, `fn:time:month(Time)`, `fn:time:day(Time)`,

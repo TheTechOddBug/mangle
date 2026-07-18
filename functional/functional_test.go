@@ -1733,6 +1733,59 @@ func TestTimeAddCivilInvalid(t *testing.T) {
 	}
 }
 
+func TestTimeWeekdayCivil(t *testing.T) {
+	tests := []struct {
+		name  string
+		nanos int64
+		tz    string
+		want  int64
+	}{
+		{
+			// 2024-01-15 12:00:00 UTC is a Monday.
+			name: "monday_utc", nanos: 1705320000000000000, tz: "UTC", want: 1,
+		},
+		{
+			// 2024-01-21 12:00:00 UTC is a Sunday.
+			name: "sunday_utc", nanos: 1705838400000000000, tz: "UTC", want: 7,
+		},
+		{
+			// 2024-01-15 02:00:00 UTC is still Sunday 2024-01-14 18:00 in LA.
+			name: "crosses_date_into_sunday_la", nanos: 1705284000000000000, tz: "America/Los_Angeles", want: 7,
+		},
+		{
+			// Same instant is already Monday in UTC.
+			name: "crosses_date_monday_utc", nanos: 1705284000000000000, tz: "UTC", want: 1,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			expr := ast.ApplyFn{symbols.TimeWeekdayCivil, []ast.BaseTerm{
+				ast.Time(test.nanos),
+				ast.String(test.tz),
+			}}
+			got, err := EvalApplyFn(expr, ast.ConstSubstMap{})
+			if err != nil {
+				t.Fatalf("EvalApplyFn(%v) failed with %v", expr, err)
+			}
+			want := ast.Number(test.want)
+			if !got.Equals(want) {
+				t.Errorf("EvalApplyFn(%v) = %v, want %v", expr, got, want)
+			}
+		})
+	}
+}
+
+func TestTimeWeekdayCivilInvalid(t *testing.T) {
+	expr := ast.ApplyFn{symbols.TimeWeekdayCivil, []ast.BaseTerm{
+		ast.Time(1705320000000000000),
+		ast.String("Mars/Olympus_Mons"),
+	}}
+	if _, err := EvalApplyFn(expr, ast.ConstSubstMap{}); err == nil {
+		t.Fatalf("EvalApplyFn(%v) expected error, got nil", expr)
+	}
+}
+
 func TestDurationAdd(t *testing.T) {
 	d1 := int64(3600000000000) // 1 hour
 	d2 := int64(1800000000000) // 30 minutes
